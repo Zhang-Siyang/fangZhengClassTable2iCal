@@ -4,8 +4,9 @@
 ### 用法
     1. 将 kbSourceJson 修改为你课表源文件([获取方式](#获取课表源文件))的地址
     2. 将 classBegintime 修改为你学校的作息表
-    3. 类 WhenWhoWhere 中 genname() 的返回值可改可不改(仅对Google Calender做了测试)
-    4. 运行，可在当前目录下得到 classTable.ics 文件
+    3. 类 WhenWhoWhere 中 firstDay 改为第一周周一的日期
+    4. 类 WhenWhoWhere 中 genname() 的返回值可改可不改(仅对Google Calender做了测试)
+    5. 运行，可在当前目录下得到 classTable.ics 文件
 ### 效果图：
 ![Calender.App](https://i.imgur.com/GUFA1iT.png)
 ### 获取课表源文件
