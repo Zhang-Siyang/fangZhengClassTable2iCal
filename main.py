@@ -5,7 +5,7 @@ import copy
 from datetime import datetime, timedelta
 from icalendar import Calendar, Event
 
-isDEBUG = 1
+isDEBUG = 0
 friendlyName = {
     "zcd": "lengthAndJump",
     "xqj": "date",
@@ -29,7 +29,7 @@ class WhenWhoWhere:
     """Storage environment variables, which semester, which class and which school"""
 
     year = '18-19'
-    semester = '第一学期'  # 1: First Semester 2: Second Semeste
+    semester = '第一学期'
     ssalc = '一班'  # ssalc is r'class'
     grand = '16级'
     major = '软件工程'
@@ -93,5 +93,5 @@ for lesson in lessons:
     temForEvent.add('description', lesson['teacher'] + "~" + lesson['menber'] + "人~" + lesson['examtype'])
     wholeiCal.add_component(copy.deepcopy(temForEvent))
 
-with open('/tmp/basic.ics', 'wb') as f:
+with open('classTable.ics', 'wb') as f:
     f.write(wholeiCal.to_ical())
