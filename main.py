@@ -5,7 +5,7 @@ import copy
 from datetime import datetime, timedelta
 from icalendar import Calendar, Event
 
-isDEBUG = 0
+isDEBUG = True
 
 kbSourceJson = '/Users/siyang/kb_tem.json'  # 抓包存放位置
 
