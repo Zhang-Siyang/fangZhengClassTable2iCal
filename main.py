@@ -9,7 +9,7 @@ from icalendar import Calendar, Event
 spot = datetime.strptime('2019-05-01', "%Y-%m-%d")
 kbSourceJson = 'tem.json'  # 抓包存放位置
 firstDay = datetime.strptime('2019-02-25', "%Y-%m-%d")  # 第一周周一
-iCalTitle = '18-19·第二学期·一班·16级·软件工程·学院·大学'
+iCalTitle = '18-19·第二学期·一班·16级·软件工程·某学院·某大学'
 timeTable = [{
     1: [8, 20],
     3: [10, 20],
@@ -35,21 +35,25 @@ friendlyName = {  # 翻译一下鬼畜级别的字段名
 
 
 class Class:
-    '用于表示一门课的类'
+    """用于表示一门课的类"""
 
-    def __init__(self, classWithJson):
-        for k, v in friendlyName.items():
-            setattr(self, '__' + v, classWithJson[k])
+    def __init__(self, classes_in_dict: dict) -> None:
+        self.__friendlyName = friendlyName
+        for k, v in self.__friendlyName.items():
+            if classes_in_dict[k]:  # 防止没有这个属性
+                setattr(self, '__' + v, classes_in_dict[k])
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """DEBUG用函数，返回str格式的课程信息"""
         result = ''
-        for k, v in friendlyName.items():
+        for v in self.__friendlyName.values():
             result += '{} is {}\n'.format(v, getattr(self, '__' + v))
         return result
 
-    def getOneVer(self, name):
-        if hasattr(self, '__' + name):
-            return getattr(self, '__' + name)
+    def get_attribute(self, attribute_name: str) -> str:
+        """获取属性，如ClassAsClass.get_attribute('summary')"""
+        if hasattr(self, '__' + attribute_name):
+            return getattr(self, '__' + attribute_name)
         else:
             return None
 
@@ -66,18 +70,19 @@ class iCalBuilder:
         self.__iCal.add("X-WR-TIMEZONE", self.timeZone)
 
     def add_one_class(self, ClassAsClass: Class):
+        """新增一节课的信息，新课的类型为Class"""
         tem_for_event = Event()
-        tem_for_event.add('summary', ClassAsClass.getOneVer('summary'))
-        delay_time = timedelta(days=int(ClassAsClass.getOneVer('date')) - 1)  # 周几的课
+        tem_for_event.add('summary', ClassAsClass.get_attribute('summary'))
+        delay_time = timedelta(days=int(ClassAsClass.get_attribute('date')) - 1)  # 周几的课
 
         if firstDay + delay_time >= spot:
-            delay_time += timedelta(hours=timeTable[0][int(ClassAsClass.getOneVer('time')[0:1])][0],
-                                    minutes=timeTable[0][int(ClassAsClass.getOneVer('time')[0:1])][1])
+            delay_time += timedelta(hours=timeTable[0][int(ClassAsClass.get_attribute('time')[0:1])][0],
+                                    minutes=timeTable[0][int(ClassAsClass.get_attribute('time')[0:1])][1])
         else:
-            delay_time += timedelta(hours=timeTable[1][int(ClassAsClass.getOneVer('time')[0:1])][0],
-                                    minutes=timeTable[1][int(ClassAsClass.getOneVer('time')[0:1])][1])
+            delay_time += timedelta(hours=timeTable[1][int(ClassAsClass.get_attribute('time')[0:1])][0],
+                                    minutes=timeTable[1][int(ClassAsClass.get_attribute('time')[0:1])][1])
         lessonBeginTime = delay_time + firstDay
-        lengthAndDanshuangZhou = ClassAsClass.getOneVer('lengthAndJump').split('周')
+        lengthAndDanshuangZhou = ClassAsClass.get_attribute('lengthAndJump').split('周')
         beginAndEndOfClass = lengthAndDanshuangZhou[0].split('-')  # 存储课程起止周数
         if lengthAndDanshuangZhou[1] != '':  # 如果周后面有字，说明分了单双周
             tem_for_event.add('RRULE',
@@ -95,12 +100,13 @@ class iCalBuilder:
         tem_for_event.add('dtstart', lessonBeginTime, parameters={'TZID': self.timeZone})
         tem_for_event.add('dtend', lessonBeginTime + timedelta(minutes=class_length),
                           parameters={'TZID': self.timeZone})
-        tem_for_event.add('location', ClassAsClass.getOneVer('location'))
-        tem_for_event.add('description', ClassAsClass.getOneVer('teacher') + "~" + ClassAsClass.getOneVer(
-            'number') + "人~" + ClassAsClass.getOneVer('examtype'))
+        tem_for_event.add('location', ClassAsClass.get_attribute('location'))
+        tem_for_event.add('description', ClassAsClass.get_attribute('teacher') + "~" + ClassAsClass.get_attribute(
+            'number') + "人~" + ClassAsClass.get_attribute('examtype'))
         self.__iCal.add_component(copy.deepcopy(tem_for_event))
 
-    def to_ical(self):
+    def to_ical(self) -> bytes:
+        """返回当前课表的iCal格式档"""
         return self.__iCal.to_ical()
 
 
